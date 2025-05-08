@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout MARCENEIRO.A.I</title>
+</head>
+<body>
+  <h1>Escolha seu plano:</h1>
+
+  <button onclick="criarCheckout('plus')">Plano Plus (R$29,90)</button>
+  <br><br>
+  <button onclick="criarCheckout('profissional')">Plano Profissional (R$59,90)</button>
+
+  <script>
+    async function criarCheckout(plano) {
+      try {
+        const response = await fetch(`http://localhost:3000/criar-checkout/${plano}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        });
+
+        const data = await response.json();
+
+        if (data.init_point) {
+          window.open(data.init_point, "_blank");
+        } else {
+          alert("Erro ao criar checkout");
+        }
+      } catch (error) {
+        console.error("Erro:", error);
+        alert("Erro ao conectar com o servidor.");
+      }
+    }
+  </script>
+</body>
+</html>

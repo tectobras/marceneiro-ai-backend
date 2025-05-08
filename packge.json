@@ -1,0 +1,19 @@
+{
+  "name": "marceneiro-ai-backend",
+  "version": "1.0.0",
+  "description": "API do aplicativo Marceneiro.A.I",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "Almir D Maria",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.3.1",
+    "mercadopago": "^1.5.14"
+  }
+}
