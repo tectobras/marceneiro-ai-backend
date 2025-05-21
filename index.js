@@ -1,9 +1,21 @@
+require("dotenv").config();
+const mongoose = require("mongoose");
 const express = require("express");
 const cors = require("cors");
 const { MercadoPagoConfig, Preference } = require("mercadopago");
 
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log("✅ MongoDB conectado com sucesso"))
+.catch((err) => {
+  console.error("❌ Erro ao conectar ao MongoDB:", err);
+  process.exit(1);
+});
+
 const mercadopago = new MercadoPagoConfig({
-  accessToken: "APP_USR-5342420837637999-110116-9d289b7d9e2ec869ce628cdb7deeb26d-96300839"
+  accessToken: process.env.MERCADO_PAGO_TOKEN
 });
 
 const app = express();
@@ -47,10 +59,11 @@ app.post("/criar-checkout/:plano", async (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send("Servidor do MARCENEIRO.A.I rodando 🚀");
+  res.send("🚀 Backend do MARCENEIRO.A.I está rodando!");
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
