@@ -1,20 +1,38 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
 const { MercadoPagoConfig, Preference } = require("mercadopago");
+const verifyFirebaseToken = require("./firebase/verifyFirebaseToken");
 
+// 🔧 Configuração do Mongoose
+mongoose.set('strictQuery', false);
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log("✅ MongoDB conectado com sucesso"))
+.catch((err) => {
+  console.error("❌ Erro ao conectar ao MongoDB:", err);
+  process.exit(1);
+});
+
+// 🔐 Configuração do Mercado Pago
 const mercadopago = new MercadoPagoConfig({
-  accessToken: "APP_USR-5342420837637999-110116-9d289b7d9e2ec869ce628cdb7deeb26d-96300839"
+  accessToken: process.env.MERCADO_PAGO_TOKEN
 });
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// 💳 Planos disponíveis
 const planos = {
   plus: { title: "Plano Plus", price: 29.9 },
   profissional: { title: "Plano Profissional", price: 59.9 }
 };
 
+// 💸 Criar checkout Mercado Pago
 app.post("/criar-checkout/:plano", async (req, res) => {
   const plano = req.params.plano;
 
@@ -46,11 +64,18 @@ app.post("/criar-checkout/:plano", async (req, res) => {
   }
 });
 
+// 🌐 Rota pública
 app.get("/", (req, res) => {
-  res.send("Servidor do MARCENEIRO.A.I rodando 🚀");
+  res.send("🚀 Backend do MARCENEIRO.A.I está rodando!");
 });
 
-const PORT = process.env.PORT || 3000;
+// 🔐 Rota protegida por Firebase Auth
+app.get("/protegido", verifyFirebaseToken, (req, res) => {
+  res.json({ message: `Bem-vindo, ${req.user.email}` });
+});
+
+// 🧱 Iniciar servidor
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
