@@ -3,11 +3,32 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const { MercadoPagoConfig, Preference } = require("mercadopago");
-const verifyFirebaseToken = require("./firebase/verifyFirebaseToken");
+const admin = require("firebase-admin");
 
-// 🔧 Configuração do Mongoose
+// 🔐 Inicialização do Firebase Admin
+const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_SDK); // O JSON do Service Account em uma variável/secreto no Cloud Run
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+// 🔐 Middleware de verificação do Firebase Auth
+const verifyFirebaseToken = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: "Token não fornecido" });
+
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    res.status(401).json({ error: "Token inválido" });
+  }
+};
+
+// 🔧 Configuração do Mongoose (MongoDB Atlas)
 mongoose.set('strictQuery', false);
-mongoose.connect(process.env.MONGO_URI, {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
@@ -79,3 +100,4 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
+
